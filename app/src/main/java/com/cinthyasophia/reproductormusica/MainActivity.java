@@ -2,6 +2,7 @@ package com.cinthyasophia.reproductormusica;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -72,6 +73,8 @@ public class MainActivity extends AppCompatActivity {
         final CancionesAdapter adapter = new CancionesAdapter(canciones);
         rvListaCanciones.setAdapter(adapter);
         rvListaCanciones.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false));
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(rvListaCanciones.getContext(), LinearLayoutManager.VERTICAL);
+        rvListaCanciones.addItemDecoration(dividerItemDecoration);
 
 
         final Runnable runnable = new Runnable() {

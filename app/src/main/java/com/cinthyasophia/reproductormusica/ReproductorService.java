@@ -41,7 +41,7 @@ public class ReproductorService extends Service implements MediaPlayer.OnComplet
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        reproductor.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
+        //reproductor.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
         return START_STICKY;
     }
 
@@ -50,9 +50,6 @@ public class ReproductorService extends Service implements MediaPlayer.OnComplet
     }
 
     public void play() {
-        if (canciones.size() <= posicionCancion){
-            posicionCancion=0;
-        }
 
         AssetFileDescriptor afd = this.getResources().openRawResourceFd(canciones.get(posicionCancion).getId());
 
@@ -65,6 +62,12 @@ public class ReproductorService extends Service implements MediaPlayer.OnComplet
                 reproductor.seekTo(progress);
             }
             reproductor.start();
+
+            if (posicionCancion == canciones.size()-1){
+                posicionCancion = 0;
+            }else if(posicionCancion == 0){
+                posicionCancion = canciones.size()-1;
+            }
 
 
         }
@@ -90,12 +93,15 @@ public class ReproductorService extends Service implements MediaPlayer.OnComplet
         return reproductor.getCurrentPosition();
     }
     public void nextOrPrevSong(String accion){
+        System.out.println(canciones.size());
         switch (accion){
             case "Next":
                 posicionCancion++;
+
                 break;
             case "Prev":
                 posicionCancion--;
+
                 break;
 
             default:
@@ -145,7 +151,7 @@ public class ReproductorService extends Service implements MediaPlayer.OnComplet
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-        posicionCancion++;
+        //posicionCancion++;
         play();
     }
 
