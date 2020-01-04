@@ -15,7 +15,7 @@ import java.util.ArrayList;
 
 public class ReproductorService extends Service implements MediaPlayer.OnCompletionListener, MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener {
     private static final String TAG = "ReproductorService";
-    private final int CANTIDAD_CANCIONES = 3;
+    private final int CANTIDAD_CANCIONES = 5;
     private ArrayList<Cancion> canciones;
     private final IBinder mBinder= new MusicBinder();
     private MediaPlayer reproductor;
