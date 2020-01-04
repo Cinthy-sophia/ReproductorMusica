@@ -17,7 +17,6 @@ public class ReproductorService extends Service implements MediaPlayer.OnComplet
     private static final String TAG = "ReproductorService";
     private final int CANTIDAD_CANCIONES = 3;
     private ArrayList<Cancion> canciones;
-    private Thread thread = null;
     private final IBinder mBinder= new MusicBinder();
     private MediaPlayer reproductor;
     private int posicionCancion;
@@ -41,7 +40,7 @@ public class ReproductorService extends Service implements MediaPlayer.OnComplet
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        //reproductor.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
+        reproductor.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
         return START_STICKY;
     }
 
@@ -50,6 +49,9 @@ public class ReproductorService extends Service implements MediaPlayer.OnComplet
     }
 
     public void play() {
+        if (posicionCancion == canciones.size()){
+            posicionCancion = 0;
+        }
 
         AssetFileDescriptor afd = this.getResources().openRawResourceFd(canciones.get(posicionCancion).getId());
 
@@ -63,22 +65,21 @@ public class ReproductorService extends Service implements MediaPlayer.OnComplet
             }
             reproductor.start();
 
-            if (posicionCancion == canciones.size()-1){
-                posicionCancion = 0;
-            }else if(posicionCancion == 0){
+
+            if(posicionCancion == 0){
                 posicionCancion = canciones.size()-1;
             }
 
 
         }
         catch (IllegalArgumentException e) {
-            Log.e(TAG, "IllegalArgumentException Unable to play audio : " + e.getMessage());
+            Log.e(TAG, "IllegalArgumentException: " + e.getMessage());
         }
         catch (IllegalStateException e) {
-            Log.e(TAG, "IllegalStateException Unable to play audio : " + e.getMessage());
+            Log.e(TAG, "IllegalStateException: " + e.getMessage());
         }
         catch (IOException e) {
-            Log.e(TAG, "IOException Unable to play audio : " + e.getMessage());
+            Log.e(TAG, "IOException: " + e.getMessage());
         }
     }
 
@@ -90,10 +91,13 @@ public class ReproductorService extends Service implements MediaPlayer.OnComplet
         return reproductor.getDuration();
     }
     public int getCurrentPosition(){
+        if (reproductor.getCurrentPosition()== reproductor.getDuration()){
+            posicionCancion++;
+        }
         return reproductor.getCurrentPosition();
     }
     public void nextOrPrevSong(String accion){
-        System.out.println(canciones.size());
+
         switch (accion){
             case "Next":
                 posicionCancion++;
@@ -123,7 +127,7 @@ public class ReproductorService extends Service implements MediaPlayer.OnComplet
             }
         }
         progress = 0;
-        //play();
+        play();
     }
 
     @Override
@@ -151,7 +155,6 @@ public class ReproductorService extends Service implements MediaPlayer.OnComplet
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-        //posicionCancion++;
         play();
     }
 
@@ -165,11 +168,6 @@ public class ReproductorService extends Service implements MediaPlayer.OnComplet
     @Override
     public void onPrepared(MediaPlayer mp) {
         Log.i(TAG,"onPrepared");
-        /*if (mp.isPlaying()){
-            mp.pause();
-        }else{
-            mp.start();
-        }*/
     }
 
     public class MusicBinder extends Binder {
