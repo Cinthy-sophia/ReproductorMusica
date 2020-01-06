@@ -15,7 +15,7 @@ import java.util.ArrayList;
 
 public class ReproductorService extends Service implements MediaPlayer.OnCompletionListener, MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener {
     private static final String TAG = "ReproductorService";
-    private final int CANTIDAD_CANCIONES = 5;
+    private final int CANTIDAD_CANCIONES = 3;
     private ArrayList<Cancion> canciones;
     private final IBinder mBinder= new MusicBinder();
     private MediaPlayer reproductor;
@@ -34,8 +34,8 @@ public class ReproductorService extends Service implements MediaPlayer.OnComplet
         progress=0;
         reproductor = MediaPlayer.create(ReproductorService.this,canciones.get(posicionCancion).getId());
         reproductor.setOnCompletionListener(ReproductorService.this);
-        reproductor.setOnPreparedListener(ReproductorService.this);
         reproductor.setOnErrorListener(ReproductorService.this);
+
     }
 
     @Override
@@ -49,27 +49,19 @@ public class ReproductorService extends Service implements MediaPlayer.OnComplet
     }
 
     public void play() {
-        if (posicionCancion == canciones.size()){
-            posicionCancion = 0;
-        }
-
+        Log.i(TAG,"LA POSICION DE LA CANCION ES "+posicionCancion);
         AssetFileDescriptor afd = this.getResources().openRawResourceFd(canciones.get(posicionCancion).getId());
 
         try {
             reproductor.reset();
             reproductor.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getDeclaredLength());
-            reproductor.prepare();
-            afd.close();
             if (progress!=0){
                 reproductor.seekTo(progress);
             }
+            afd.close();
+            reproductor.setOnPreparedListener(ReproductorService.this);
+            reproductor.prepare();
             reproductor.start();
-
-
-            if(posicionCancion == 0){
-                posicionCancion = canciones.size()-1;
-            }
-
 
         }
         catch (IllegalArgumentException e) {
@@ -91,27 +83,34 @@ public class ReproductorService extends Service implements MediaPlayer.OnComplet
         return reproductor.getDuration();
     }
     public int getCurrentPosition(){
-        if (reproductor.getCurrentPosition()== reproductor.getDuration()){
-            posicionCancion++;
-        }
         return reproductor.getCurrentPosition();
     }
     public void nextOrPrevSong(String accion){
 
         switch (accion){
             case "Next":
-                posicionCancion++;
+                if (posicionCancion == canciones.size()-1){
+                    posicionCancion = 0;
+                }else{
+                    posicionCancion++;
+                }
+                Log.i(TAG,"LA POSICION DE LA CANCION ES "+posicionCancion);
 
                 break;
             case "Prev":
-                posicionCancion--;
-
+                if(posicionCancion == 0){
+                    posicionCancion = canciones.size()-1;
+                }else{
+                    posicionCancion--;
+                }
+                Log.i(TAG,"LA POSICION DE LA CANCION ES "+posicionCancion);
                 break;
 
             default:
 
                 break;
         }
+        Log.i(TAG,"LA POSICION DE LA CANCION ES "+posicionCancion);
 
         play();
     }
@@ -155,6 +154,13 @@ public class ReproductorService extends Service implements MediaPlayer.OnComplet
 
     @Override
     public void onCompletion(MediaPlayer mp) {
+        posicionCancion++;
+        if(posicionCancion == 0){
+            posicionCancion = canciones.size()-1;
+        }else  if (posicionCancion == canciones.size()){
+            posicionCancion = 0;
+        }
+        Log.i(TAG,"LA POSICION DE LA CANCION ES "+posicionCancion);
         play();
     }
 
