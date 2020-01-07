@@ -11,7 +11,10 @@ import android.os.PowerManager;
 import android.util.Log;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+
+import javax.xml.datatype.DatatypeConstants;
 
 public class ReproductorService extends Service implements MediaPlayer.OnCompletionListener, MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener {
     private static final String TAG = "ReproductorService";
@@ -49,7 +52,6 @@ public class ReproductorService extends Service implements MediaPlayer.OnComplet
     }
 
     public void play() {
-        Log.i(TAG,"LA POSICION DE LA CANCION ES "+posicionCancion);
         AssetFileDescriptor afd = this.getResources().openRawResourceFd(canciones.get(posicionCancion).getId());
 
         try {
@@ -94,7 +96,6 @@ public class ReproductorService extends Service implements MediaPlayer.OnComplet
                 }else{
                     posicionCancion++;
                 }
-                Log.i(TAG,"LA POSICION DE LA CANCION ES "+posicionCancion);
 
                 break;
             case "Prev":
@@ -103,14 +104,12 @@ public class ReproductorService extends Service implements MediaPlayer.OnComplet
                 }else{
                     posicionCancion--;
                 }
-                Log.i(TAG,"LA POSICION DE LA CANCION ES "+posicionCancion);
                 break;
 
             default:
 
                 break;
         }
-        Log.i(TAG,"LA POSICION DE LA CANCION ES "+posicionCancion);
 
         play();
     }
@@ -143,11 +142,16 @@ public class ReproductorService extends Service implements MediaPlayer.OnComplet
     private ArrayList<Cancion> leerCanciones(){
         MediaPlayer mp;
         ArrayList<Cancion> canciones = new ArrayList<>();
-        int idCancion;
-        for (int i =1; i <=CANTIDAD_CANCIONES ; i++) {
-            idCancion = getResources().getIdentifier("raw/"+"s"+i,null,getPackageName());
+        int idCancion=0;
+        for (int i =0; i <fields.length ; i++) {
+            //getResources().getIdentifier("raw/"+"s"+i,null,getPackageName());
+            try {
+                idCancion = fields[i].getInt(fields[i]);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
             mp = MediaPlayer.create(this,idCancion);
-            canciones.add(new Cancion(idCancion,"s"+i,mp.getDuration()));
+            canciones.add(new Cancion(idCancion,getResources().getResourceName(idCancion),mp.getDuration()));
         }
         return canciones;
     }
@@ -160,7 +164,6 @@ public class ReproductorService extends Service implements MediaPlayer.OnComplet
         }else  if (posicionCancion == canciones.size()){
             posicionCancion = 0;
         }
-        Log.i(TAG,"LA POSICION DE LA CANCION ES "+posicionCancion);
         play();
     }
 
