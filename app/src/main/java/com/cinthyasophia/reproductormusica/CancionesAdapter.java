@@ -65,7 +65,7 @@ public class CancionesAdapter extends RecyclerView.Adapter<CancionesAdapter.Canc
         }
 
         public void bindCancion(Cancion cancion){
-            tvNombreCancion.setText(cancion.getNombre());
+            tvNombreCancion.setText(cancion.getNombre().toUpperCase());
         }
 
 
